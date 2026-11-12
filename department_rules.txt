@@ -1,0 +1,16 @@
+Computer Science and Engineering Department - Rules and Brochure
+
+Course Registration:
+Students must register for elective courses within the first two weeks of each semester through the department portal. Once registered, an elective cannot be changed after the third week without Head of Department approval. Each student must complete at least two open electives and one professional elective before graduation.
+
+Faculty Consultation Hours:
+Faculty members are available for student consultation between 3:00 PM and 4:30 PM on all working days, except Wednesdays which are reserved for department meetings. Students should book consultation slots in advance through the department notice board or email.
+
+Lab Facilities:
+The department operates three computer labs, open from 9:00 AM to 5:00 PM. Students working on major projects may request extended lab access after submitting a request form countersigned by their project guide. All lab systems have Python, VS Code, and standard development tools pre-installed.
+
+Placement Cell Information:
+The department placement cell begins pre-placement training in the sixth semester. Students must maintain a minimum CGPA of 6.5 to be eligible for campus placement drives. Resume submissions for placement season open in the seventh semester and close two weeks before the first scheduled company visit.
+
+Project Guidelines:
+Final year projects must be registered with a faculty guide by the start of the seventh semester. Project teams may have a maximum of four students. A mid-review presentation is mandatory in the eighth semester before the final viva-voce examination.
