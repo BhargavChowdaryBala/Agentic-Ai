@@ -11,8 +11,8 @@ import re
 from pathlib import Path
 from dotenv import load_dotenv
 from groq import Groq
-
-load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+load_dotenv()
+# load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 SYSTEM_PROMPT = (
@@ -30,33 +30,52 @@ SYSTEM_PROMPT = (
 # TOOL 1: math - safely evaluates a simple arithmetic expression
 # ---------------------------------------------------------------
 def math_tool(query: str) -> str:
-    expression = "".join(re.findall(r"[\d\.\+\-\*\/\(\)\s]+", query)).strip()
-    if not expression:
-        return "I couldn't find a valid math expression in your query."
-    try:
-        result = eval(expression, {"__builtins__": {}}, {})
-        return f"Result: {expression.strip()} = {result}"
-    except Exception:
-        return "Sorry, I couldn't safely evaluate that expression."
+    # expression = "".join(re.findall(r"[\d\.\+\-\*\/\(\)\s]+", query)).strip()
+    # if not expression:
+    #     return "I couldn't find a valid math expression in your query."
+    # try:
+    #     result = eval(expression, {"__builtins__": {}}, {})
+    #     return f"Result: {expression.strip()} = {result}"
+    # except Exception:
+    #     return "Sorry, I couldn't safely evaluate that expression."
+    prompt = (
+    "You are a mathematics assistant. "
+    "Solve the mathematical expression provided by the user accurately. "
+    "Return the final answer only."
+)
+    response=client.chat.completions.create(
+        model="openai/gpt-oss-120b",
+        messages=[
+            {"role":"system","content":prompt},
+            {"role":"user","content":query}
+        ]
+
+    )
+    return response.choices[0].message.content.strip()
 
 
 # ---------------------------------------------------------------
 # TOOL 2: python_help - looks up a canned explanation for common topics
 # ---------------------------------------------------------------
-PYTHON_HELP = {
-    "list": "A list is an ordered, changeable collection: my_list = [1, 2, 3]",
-    "loop": "Use 'for item in sequence:' or 'while condition:' to repeat code.",
-    "function": "Define with 'def name(params):' and return a value with 'return'.",
-    "dictionary": "A dictionary stores key-value pairs: my_dict = {'key': 'value'}",
-    "error": "Check the last line of the traceback - it usually names the exact issue.",
-}
+# PYTHON_HELP = {
+#     "list": "A list is an ordered, changeable collection: my_list = [1, 2, 3]",
+#     "loop": "Use 'for item in sequence:' or 'while condition:' to repeat code.",
+#     "function": "Define with 'def name(params):' and return a value with 'return'.",
+#     "dictionary": "A dictionary stores key-value pairs: my_dict = {'key': 'value'}",
+#     "error": "Check the last line of the traceback - it usually names the exact issue.",
+# }
 
 def python_help_tool(query: str) -> str:
-    query_lower = query.lower()
-    for keyword, explanation in PYTHON_HELP.items():
-        if keyword in query_lower:
-            return f"[Python Help - {keyword}] {explanation}"
-    return "[Python Help] Try rephrasing with a specific topic like 'list', 'loop', or 'function'."
+    prompt="explain about the concept given by user in python in only 2 lines of paragraph and  return only the answer nothing else"
+    response=client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=[
+                {"role":"system","content":prompt},
+                {"role":"user","content":query}
+            ]
+    
+        )
+    return response.choices[0].message.content.strip()
 
 
 # ---------------------------------------------------------------

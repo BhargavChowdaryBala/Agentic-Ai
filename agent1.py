@@ -1,9 +1,9 @@
 import os
-from pathlib import Path
+# from pathlib import Path
 from dotenv import load_dotenv
 from groq import Groq
-load_dotenv(dotenv_path=Path(__file__).parent / ".env")
- 
+load_dotenv()
+#  dotenv_path=Path(__file__).parent / ".env"
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 SYSTEM_PROMPT = (
@@ -30,7 +30,7 @@ def general_handler(query: str) -> str:
 INTENT_ROUTES = {
     "Academic": academic_handler,
     "Exam": exam_handler,
-    "General": general_handler,
+    "General": general_handler, 
 }
 def classify_intent(query: str) -> str:
     response = client.chat.completions.create(
@@ -41,6 +41,7 @@ def classify_intent(query: str) -> str:
         ],
         temperature=0,
     )
+    print(response.choices)
     label = response.choices[0].message.content.strip()
 
     if label not in INTENT_ROUTES:

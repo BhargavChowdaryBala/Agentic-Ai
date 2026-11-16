@@ -15,8 +15,14 @@ from langchain_community.vectorstores import Chroma
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 
-load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+from langchain_core.output_parsers import StrOutputParser
+from langchain_google_genai import ChatGoogleGenerativeAI,GoogleGenerativeAIEmbeddings
+from langchain_community.vectorstores import FAISS
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
 
+# load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+load_dotenv()
 # ---------------------------------------------------------------
 # STEP 1: Load the document
 # ---------------------------------------------------------------
@@ -32,21 +38,28 @@ chunks = splitter.split_documents(documents)
 # ---------------------------------------------------------------
 # STEP 3: Embed chunks and store in Chroma (vector database)
 # ---------------------------------------------------------------
-embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-vectorstore = Chroma.from_documents(chunks, embeddings)
+# embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+embeddings=GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+# vectorstore = Chroma.from_documents(chunks, embeddings)
+vectorstore=FAISS.from_documents(chunks,embeddings)
 retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
 
 # ---------------------------------------------------------------
 # STEP 4: Set up the LLM and prompt template
 # ---------------------------------------------------------------
-llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=os.getenv("GROQ_API_KEY"))
+# llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0, api_key=os.getenv("GROQ_API_KEY"))
+llm=ChatGoogleGenerativeAI(model="gemini-3.5-flash",temperature=0)
 
-prompt = PromptTemplate.from_template(
+# prompt = PromptTemplate.from_template(
+#     "Answer the student's question using ONLY the context below. "
+#     "If the answer isn't in the context, say you don't have that information.\n\n"
+#     "Context:\n{context}\n\nQuestion: {question}\n\nAnswer:"
+# )
+prompt = ChatPromptTemplate.from_template(
     "Answer the student's question using ONLY the context below. "
     "If the answer isn't in the context, say you don't have that information.\n\n"
     "Context:\n{context}\n\nQuestion: {question}\n\nAnswer:"
 )
-
 
 def run_agent(query: str) -> str:
     print(f"\n[Observe] Query: {query}")
@@ -55,11 +68,15 @@ def run_agent(query: str) -> str:
     print(f"[Decide] Retrieved {len(docs)} relevant chunk(s)")
 
     context = "\n\n".join(d.page_content for d in docs)
-    chain = prompt | llm
-    response = chain.invoke({"context": context, "question": query})
+    chain = {"context":retriever,"question":RunnablePassthrough() }|prompt | llm | StrOutputParser()
+    # response = chain.invoke({"context": context, "question": query})
+    response=chain.invoke(query)
 
-    print(f"[Act] Answer: {response.content}")
-    return response.content
+    print(f"[Act] Answer: {response}")
+    return response
+
+
+
 
 
 def main():
